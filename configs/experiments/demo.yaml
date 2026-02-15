@@ -1,0 +1,15 @@
+experiment:
+  name: "wind_racecourse_demo"
+  task_type: "short"
+  dataset_version: "demo_ds_v1"
+  sites: ["site_a", "site_b", "site_c"]
+  series_length: 300
+  train_size: 160
+  horizons: [1, 2, 4, 8]
+
+models:
+  - name: "persistence"
+    params: {}
+  - name: "moving_average"
+    params:
+      window: 8

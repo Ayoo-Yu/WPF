@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>风电预测赛马场 Demo</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="bg"></div>
+    <main class="container">
+      <header class="hero">
+        <h1>风电功率预测赛马场</h1>
+        <p>一键运行 Demo，查看历史回测与排行榜。</p>
+      </header>
+
+      <section class="card controls">
+        <div class="row">
+          <label for="configPath">配置路径</label>
+          <input id="configPath" value="configs/experiments/demo.yaml" />
+        </div>
+        <div class="actions">
+          <button id="runBtn">运行 Demo</button>
+          <button id="refreshBtn" class="ghost">刷新运行记录</button>
+        </div>
+        <pre id="runLog" class="log">等待运行...</pre>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>历史运行</h2>
+          <div id="runs" class="list"></div>
+        </article>
+
+        <article class="card">
+          <div class="row-inline">
+            <h2>排行榜 (avg_MAE / avg_RMSE)</h2>
+            <label class="site-filter">
+              场站
+              <select id="siteFilter"></select>
+            </label>
+          </div>
+          <div id="leaderboardChart"></div>
+          <div id="leaderboard"></div>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>分 Horizon 指标</h2>
+        <div class="charts-grid">
+          <div>
+            <h3>MAE vs Horizon</h3>
+            <div id="maeChart"></div>
+          </div>
+          <div>
+            <h3>RMSE vs Horizon</h3>
+            <div id="rmseChart"></div>
+          </div>
+        </div>
+        <div id="metrics"></div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
