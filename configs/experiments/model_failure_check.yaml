@@ -1,0 +1,32 @@
+experiment:
+  name: "wind_racecourse_model_failure_check"
+  data_source: "real_csv"
+  task_type: "short"
+  dataset_version: "real_test_ds_v1"
+  sites: ["site_test_01"]
+  train_size: 2500
+  horizons: [1, 2]
+  refit_each_origin: false
+  skip_failed_models: true
+
+data:
+  scada_csv: "test_scada.csv"
+  nwp_csv: "test_nwp.csv"
+  timestamp_col: "Timestamp"
+  target_col: "Total_Power"
+  max_rows: 3500
+  feature_cols:
+    - "wind_speed10_10"
+    - "wind_speed100_10"
+    - "wind_speed200_10"
+
+models:
+  - name: "persistence"
+    params: {}
+  - name: "xgboost"
+    params:
+      lags: 8
+      n_estimators: 50
+      learning_rate: 0.05
+      max_depth: 4
+      feature_cols: ["wind_speed10_10", "wind_speed100_10", "wind_speed200_10"]

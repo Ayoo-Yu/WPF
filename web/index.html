@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>风电预测赛马场 Demo</title>
+    <title>风电预测赛马场</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -11,53 +11,223 @@
     <main class="container">
       <header class="hero">
         <h1>风电功率预测赛马场</h1>
-        <p>一键运行 Demo，查看历史回测与排行榜。</p>
+        <p>覆盖实验配置、批量赛马、分层评估、失败追踪与自动报告。</p>
       </header>
 
-      <section class="card controls">
-        <div class="row">
-          <label for="configPath">配置路径</label>
-          <input id="configPath" value="configs/experiments/demo.yaml" />
-        </div>
-        <div class="actions">
-          <button id="runBtn">运行 Demo</button>
-          <button id="refreshBtn" class="ghost">刷新运行记录</button>
-        </div>
-        <pre id="runLog" class="log">等待运行...</pre>
-      </section>
+      <nav class="tabs card" id="pageTabs">
+        <button data-page="arena" class="tab active">赛马场</button>
+        <button data-page="lab" class="tab">实验中心</button>
+        <button data-page="report" class="tab">报告中心</button>
+      </nav>
 
-      <section class="grid">
-        <article class="card">
-          <h2>历史运行</h2>
-          <div id="runs" class="list"></div>
-        </article>
+      <section class="page" data-page="arena">
+        <section class="card controls">
+          <div class="row">
+            <label for="configPath">配置路径</label>
+            <input id="configPath" value="configs/experiments/model_zoo_smoke.yaml" />
+          </div>
+          <div class="actions">
+            <button id="runBtn">运行实验</button>
+            <button id="refreshBtn" class="ghost">刷新运行记录</button>
+            <button id="toggleLogBtn" class="ghost">展开日志</button>
+          </div>
+          <div id="runStatus" class="run-status">
+            <span class="status-chip">状态: 待命</span>
+            <span id="runIdText">run_id: -</span>
+            <span id="runTimeText">更新时间: -</span>
+          </div>
+          <p class="hint metric-note">指标说明: MAE / RMSE / nMAE 越低越好。</p>
+          <pre id="runLog" class="log collapsed">等待运行...</pre>
+        </section>
 
-        <article class="card">
+        <section class="grid">
+          <article class="card">
+            <h2>历史运行</h2>
+            <div id="runs" class="list"></div>
+          </article>
+
+          <article class="card">
+            <div class="row-inline">
+              <h2>排行榜</h2>
+              <div class="filters-inline">
+                <label class="site-filter">
+                  模型检索
+                  <input id="modelSearch" class="search-input" placeholder="输入模型关键词" />
+                </label>
+                <label class="site-filter">
+                  场站
+                  <select id="siteFilter"></select>
+                </label>
+                <label class="site-filter">
+                  指标
+                  <select id="leaderMetric">
+                    <option value="avg_MAE">avg_MAE</option>
+                    <option value="avg_RMSE">avg_RMSE</option>
+                    <option value="avg_nMAE">avg_nMAE</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div id="leaderboardChart"></div>
+            <div id="leaderboard"></div>
+          </article>
+        </section>
+
+        <section class="card">
+          <h2>数据质量快照</h2>
+          <div id="datasetProfile"></div>
+        </section>
+
+        <section class="card">
+          <h2>失败模型</h2>
+          <div id="failedModels"></div>
+        </section>
+
+        <section class="card">
+          <h2>稳定性榜单 (跨 Horizon 波动)</h2>
+          <div id="stabilityChart"></div>
+          <div id="stability"></div>
+        </section>
+
+        <section class="card">
+          <h2>分 Horizon 指标</h2>
+          <div class="charts-grid">
+            <div>
+              <h3>MAE vs Horizon</h3>
+              <div id="maeChart"></div>
+            </div>
+            <div>
+              <h3>RMSE vs Horizon</h3>
+              <div id="rmseChart"></div>
+            </div>
+          </div>
           <div class="row-inline">
-            <h2>排行榜 (avg_MAE / avg_RMSE)</h2>
-            <label class="site-filter">
-              场站
-              <select id="siteFilter"></select>
-            </label>
+            <h3>指标表</h3>
+            <div class="filters-inline">
+              <label class="site-filter">
+                分层
+                <select id="segmentFilter">
+                  <option value="overall">overall</option>
+                  <option value="season">season</option>
+                  <option value="wind_bin">wind_bin</option>
+                </select>
+              </label>
+              <div id="metricsHint" class="hint"></div>
+            </div>
           </div>
-          <div id="leaderboardChart"></div>
-          <div id="leaderboard"></div>
-        </article>
+          <div id="metrics"></div>
+        </section>
       </section>
 
-      <section class="card">
-        <h2>分 Horizon 指标</h2>
-        <div class="charts-grid">
-          <div>
-            <h3>MAE vs Horizon</h3>
-            <div id="maeChart"></div>
+      <section class="page hidden" data-page="lab">
+        <section class="card">
+          <div class="row-inline">
+            <h2>实验配置中心</h2>
+            <button id="reloadConfigsBtn" class="ghost">刷新配置列表</button>
           </div>
-          <div>
-            <h3>RMSE vs Horizon</h3>
-            <div id="rmseChart"></div>
+          <div class="grid-2">
+            <div>
+              <label for="configSelect">可用配置</label>
+              <select id="configSelect"></select>
+              <div class="actions" style="margin-top:10px;">
+                <button id="useConfigBtn">使用该配置</button>
+                <button id="runSelectedConfigBtn" class="ghost">运行该配置</button>
+              </div>
+              <p class="hint">建议：树模型/神经网络请优先用 `model_zoo_smoke.yaml` 做快速对比，再跑 `model_zoo_demo.yaml`。</p>
+            </div>
+            <div>
+              <h3>配置预览</h3>
+              <pre id="configPreview" class="log small"></pre>
+            </div>
           </div>
-        </div>
-        <div id="metrics"></div>
+        </section>
+
+        <section class="card">
+          <h2>推荐入口</h2>
+          <div class="quick-links">
+            <button class="quick" data-config="configs/experiments/real_data_demo.yaml">真实数据基线</button>
+            <button class="quick" data-config="configs/experiments/model_zoo_smoke.yaml">模型赛马 Smoke</button>
+            <button class="quick" data-config="configs/experiments/model_zoo_demo.yaml">模型赛马 Demo</button>
+            <button class="quick" data-config="configs/experiments/model_zoo_random.yaml">随机搜索赛马</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="row-inline">
+            <h2>运行清理</h2>
+            <button id="reloadStorageBtn" class="ghost">刷新存储信息</button>
+          </div>
+          <div id="storageSummary"></div>
+          <div class="grid-2" style="margin-top:10px;">
+            <div>
+              <label for="cleanupKeepLatest">保留最新 N 次</label>
+              <input id="cleanupKeepLatest" type="number" min="0" value="20" />
+            </div>
+            <div>
+              <label for="cleanupPrefix">仅清理前缀 (可选)</label>
+              <input id="cleanupPrefix" placeholder="例如: wind_racecourse_model_zoo_" />
+            </div>
+          </div>
+          <div class="actions">
+            <button id="cleanupPreviewBtn" class="ghost">预览将删除项</button>
+            <button id="cleanupExecuteBtn">执行清理</button>
+          </div>
+          <pre id="cleanupLog" class="log collapsed">等待清理操作...</pre>
+        </section>
+      </section>
+
+      <section class="page hidden" data-page="report">
+        <section class="card">
+          <div class="row-inline">
+            <h2>运行详情</h2>
+            <button id="reloadReportBtn" class="ghost">刷新详情</button>
+          </div>
+          <div id="runSummary"></div>
+        </section>
+
+        <section class="card">
+          <div class="row-inline">
+            <h2>自动报告 (report.md)</h2>
+            <div class="actions">
+              <button id="downloadReportBtn" class="ghost">下载 report.md</button>
+              <button id="downloadLeaderboardBtn" class="ghost">下载 leaderboard.csv</button>
+              <button id="downloadMetricsBtn" class="ghost">下载 metrics.csv</button>
+            </div>
+          </div>
+          <pre id="reportText" class="log"></pre>
+        </section>
+
+        <section class="card">
+          <div class="row-inline">
+            <h2>Run 对比</h2>
+            <div class="filters-inline">
+              <label class="site-filter">
+                基准 run
+                <select id="compareBaseRun"></select>
+              </label>
+              <label class="site-filter">
+                对比 run
+                <select id="compareTargetRun"></select>
+              </label>
+              <button id="compareRunsBtn">生成对比</button>
+            </div>
+          </div>
+          <div id="compareResult"></div>
+          <div id="compareSegments"></div>
+        </section>
+
+        <section class="card">
+          <div class="row-inline">
+            <h2>最佳模型轨迹</h2>
+            <button id="reloadTrendBtn" class="ghost">刷新轨迹</button>
+          </div>
+          <div id="bestTrend"></div>
+        </section>
+
+        <section class="card">
+          <h2>运行产物</h2>
+          <div id="artifacts"></div>
+        </section>
       </section>
     </main>
 

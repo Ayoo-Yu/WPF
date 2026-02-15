@@ -5,11 +5,14 @@ def build_leaderboard(metric_rows: list[dict]) -> list[dict]:
     agg: dict[tuple[str, str], dict[str, float]] = {}
 
     for row in metric_rows:
+        if row.get("segment_key") != "overall" or row.get("segment_value") != "all":
+            continue
         key = (row["site_id"], row["model_name"])
         if key not in agg:
-            agg[key] = {"mae_sum": 0.0, "rmse_sum": 0.0, "count": 0.0}
+            agg[key] = {"mae_sum": 0.0, "rmse_sum": 0.0, "nmae_sum": 0.0, "count": 0.0}
         agg[key]["mae_sum"] += float(row["MAE"])
         agg[key]["rmse_sum"] += float(row["RMSE"])
+        agg[key]["nmae_sum"] += float(row.get("nMAE", 0.0))
         agg[key]["count"] += 1.0
 
     board: list[dict] = []
@@ -21,6 +24,7 @@ def build_leaderboard(metric_rows: list[dict]) -> list[dict]:
                 "model_name": model_name,
                 "avg_MAE": round(v["mae_sum"] / c, 6),
                 "avg_RMSE": round(v["rmse_sum"] / c, 6),
+                "avg_nMAE": round(v["nmae_sum"] / c, 6),
             }
         )
 

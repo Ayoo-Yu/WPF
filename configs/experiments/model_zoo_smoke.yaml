@@ -1,0 +1,57 @@
+experiment:
+  name: "wind_racecourse_model_zoo_smoke"
+  data_source: "real_csv"
+  task_type: "short"
+  dataset_version: "real_test_ds_v1"
+  sites: ["site_test_01"]
+  train_size: 4000
+  horizons: [1, 2, 4]
+  refit_each_origin: false
+  skip_failed_models: true
+  max_workers: 3
+
+data:
+  scada_csv: "test_scada.csv"
+  nwp_csv: "test_nwp.csv"
+  timestamp_col: "Timestamp"
+  target_col: "Total_Power"
+  max_rows: 6000
+  feature_cols:
+    - "wind_speed10_10"
+    - "wind_speed100_10"
+    - "wind_speed200_10"
+    - "2_metre_temperature_10"
+
+models:
+  - name: "persistence"
+    params: {}
+  - name: "linear_exog"
+    params:
+      lags: 8
+      feature_cols: ["wind_speed10_10", "wind_speed100_10", "wind_speed200_10"]
+  - name: "random_forest"
+    params:
+      lags: 12
+      n_estimators: 120
+      max_depth: 10
+      feature_cols: ["wind_speed10_10", "wind_speed100_10", "wind_speed200_10", "2_metre_temperature_10"]
+  - name: "mlp"
+    params:
+      lags: 12
+      hidden_layer_sizes: [32, 16]
+      max_iter: 120
+      feature_cols: ["wind_speed10_10", "wind_speed100_10", "wind_speed200_10", "2_metre_temperature_10"]
+  - name: "lightgbm"
+    params:
+      lags: 12
+      n_estimators: 180
+      learning_rate: 0.05
+      num_leaves: 31
+      feature_cols: ["wind_speed10_10", "wind_speed100_10", "wind_speed200_10", "2_metre_temperature_10"]
+  - name: "xgboost"
+    params:
+      lags: 12
+      n_estimators: 120
+      learning_rate: 0.05
+      max_depth: 6
+      feature_cols: ["wind_speed10_10", "wind_speed100_10", "wind_speed200_10", "2_metre_temperature_10"]

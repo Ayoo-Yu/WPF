@@ -1,15 +1,20 @@
 experiment:
   name: "wind_racecourse_demo"
+  data_source: "synthetic"
   task_type: "short"
   dataset_version: "demo_ds_v1"
   sites: ["site_a", "site_b", "site_c"]
   series_length: 300
   train_size: 160
   horizons: [1, 2, 4, 8]
+  refit_each_origin: true
 
 models:
   - name: "persistence"
     params: {}
   - name: "moving_average"
-    params:
-      window: 8
+    params_grid:
+      window: [6, 8]
+  - name: "linear_ar"
+    params_grid:
+      lags: [8, 12]
