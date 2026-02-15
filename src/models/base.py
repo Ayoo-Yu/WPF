@@ -13,9 +13,15 @@ class ForecastModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def fit(self, train_series: list[float]) -> None:
+    def fit(self, train_series: list[float], exog_history: list[dict[str, float]] | None = None) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def predict(self, history: list[float], horizon: int) -> float:
+    def predict(
+        self,
+        history: list[float],
+        horizon: int,
+        exog_future: dict[str, float] | None = None,
+        exog_future_seq: list[dict[str, float] | None] | None = None,
+    ) -> float:
         raise NotImplementedError
